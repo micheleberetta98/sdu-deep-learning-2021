@@ -44,43 +44,38 @@ def fit_model(model, epochs=5):
     return history
 
 
-def show_plot_loss(h):
+def show_plot_loss(subfig, h):
     loss_values = h.history['loss']
     val_loss_values = h.history['val_loss']
     epochs = range(1, len(loss_values) + 1)
 
-    plt.figure()
-    plt.plot(epochs, loss_values, label='Training loss')
-    plt.plot(epochs, val_loss_values, label='Validation loss')
-    plt.title('Training and validation loss')
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend()
-    plt.show()
+    subfig.plot(epochs, loss_values, label='Training loss')
+    subfig.plot(epochs, val_loss_values, label='Validation loss')
+    subfig.set(xlabel='Epochs', ylabel='Loss')
+    subfig.legend()
 
 
-def show_plot_accuracy(h):
+def show_plot_accuracy(subfig, h):
     accuracy_values = h.history['accuracy']
     val_accuracy_values = h.history['val_accuracy']
     epochs = range(1, len(accuracy_values) + 1)
 
-    plt.figure()
-    plt.plot(epochs, accuracy_values, label='Training accuracy')
-    plt.plot(epochs, val_accuracy_values, label='Validation accuracy')
-    plt.title('Training and validation accuracy')
-    plt.xlabel('Epochs')
-    plt.ylabel('Accuracy')
-    plt.legend()
-    plt.show()
+    subfig.plot(epochs, accuracy_values, label='Training accuracy')
+    subfig.plot(epochs, val_accuracy_values, label='Validation accuracy')
+    subfig.set(xlabel='Epochs', ylabel='Accuracy')
+    subfig.legend()
 
 
 model = build_model(16, 16)
 compile(model)
-history = fit_model(model)
+history = fit_model(model, 20)
 model.save('model-1-relu-relu-sigm.h5')
 
-show_plot_loss(history)
-show_plot_accuracy(history)
+fig, (subfig1, subfig2) = plt.subplots(2, 1)
+fig.suptitle('Model with (16, 16, 1) units')
+show_plot_accuracy(subfig1, history)
+show_plot_loss(subfig2, history)
+fig.show()
 
 # 1. What accuracy do you get?
 #    With 1 epoch, around 87% per the training data, and about 85% for the validation accuracy
@@ -104,18 +99,21 @@ print(history.history['val_accuracy'])
 #    Maybe because of overfitting, changing the model (as far as changing the units go) doesn't seem
 #    to affect the model
 
-for k in range(10, 21):
-    m = build_model(k, 16)
-    compile(m)
-    h = fit_model(m)
-    print('== Model with', k, '16')
-    print(h.history['accuracy'])
-    print(h.history['val_accuracy'])
+#  Testing values 5,10,15,20,25
 
-for k in range(10, 21):
-    m = build_model(16, k)
-    compile(m)
-    h = fit_model(m)
-    print('== Model with', '16', k)
-    print(h.history['accuracy'])
-    print(h.history['val_accuracy'])
+for i in range(5):
+    for j in range(5):
+        k1 = (i + 1) * 5
+        k2 = (j + 1) * 5
+
+        print(f'==> Checking model with ({k1}, {k2}, 1)')
+        m = build_model(k1, k2)
+        compile(m)
+        h = fit_model(m)
+
+        print('ACCURACY (testing, validation)')
+        print(h.history['accuracy'])
+        print(h.history['val_accuracy'])
+        print('LOSS (testing, validation)')
+        print(h.history['loss'])
+        print(h.history['val_loss'])
