@@ -119,8 +119,7 @@ print(results.rsquared)  # R2 = 0.70 <- still worse
 labels = ['Log', 'Square root', 'Inverse', 'Square']
 functions = [np.log, np.sqrt, lambda x: 1 / x, lambda x: x ** 2]
 
-X = df.loc[:, df.columns != 'mpg']
-X = X.loc[:, X.columns != 'name']
+X = df[['displacement', 'weight', 'model_year', 'origin']]
 
 for name, f in zip(labels, functions):
     X1 = sm.add_constant(f(X))
