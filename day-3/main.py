@@ -82,12 +82,13 @@ results = model.fit()
 print(results.summary())
 
 # R-squared is 82% - better than before
-# Significant params seems to be (p-value < 0.05)
+# Significant params seems to be (p-value < 0.05 and value different from 0)
 # - The constant
 # - Displacement
 # - Weight
 # - Model year
 # - Origin
+# No param seems to be near to 0
 
 # Let's see if omitting model year and origin gives something better
 X = df[['displacement', 'weight']]
@@ -105,11 +106,13 @@ model = sm.OLS(y, X)
 results = model.fit()
 print(results.rsquared)  # R2 = 0.70 <- still worse
 
-# So the features we car about are
+# So the features we care about are
 # - Displacement
 # - Weight
 # - Model year
 # - Origin
+
+# Adding back cylinders brings the R2 back near to 82%
 
 # ------------------------------ STEP 5
 # Can you improve your regression performance by trying different transformations of the variables,
