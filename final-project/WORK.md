@@ -3,7 +3,7 @@ Task 1:
   - Maybe 900 into testing, 100 into validation and 100 into training
   - Write a Python script to separate them (use a seed to initialize the random generator)
 
-  - Assigned: Naraendro
+  - Assigned: Narendro
 
 Task 2:
   - Use the datagenerators (ImageDataGenerator)
