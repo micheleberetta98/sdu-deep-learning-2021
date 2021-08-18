@@ -1,8 +1,11 @@
+# %% Imports
+
 import random
 import shutil
 import os
 from pathlib import Path
 
+# %% Directory creation
 
 random.seed(0)
 
@@ -15,6 +18,8 @@ for d in [test_dest, val_dest, train_dest]:
     os.mkdir(d)
     os.mkdir(d / 'normal')
     os.mkdir(d / 'pneumonia')
+
+# %% File copying
 
 
 def copy_random(no_of_files, status, dest):
