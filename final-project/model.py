@@ -1,3 +1,11 @@
+'''
+This file contains the final model which has been tested and tweaked
+in order to have the highest accuracy possible
+
+@author Michele Beretta
+@author Bianca Crippa
+'''
+
 # %% Imports
 
 import tensorflow as tf
@@ -18,7 +26,7 @@ kernel_size = (7, 7)
 n_filters = 32
 input_dropout = 0
 dense_dropout = 0
-units = [128, 128, 128]
+units = [128, 128, 64]
 
 # This is the final model comprising of all of the hyperparameters seen in model_hyperparameters
 # Here we test for dropout and regularization in order to reduce overfitting
@@ -37,6 +45,8 @@ x = Conv2D(n_filters, kernel_size, activation='relu', name='conv_2d_1')(x)
 x = MaxPooling2D((3, 3), name='max_2d_1')(x)
 x = Conv2D(n_filters, kernel_size, activation='relu', name='conv_2d_2')(x)
 x = MaxPooling2D((3, 3), name='max_2d_2')(x)
+
+x = Dropout(dense_dropout, name='dense_dropout')(x)
 x = Flatten(name='flatten_1')(x)
 
 # After the convolutional, a couple of dense layers to learn
@@ -48,10 +58,10 @@ x = Dense(units[2], activation='relu', name='dense_3')(x)
 # the output is given by this 1 neuron with a sigmoid activation function
 output = Dense(1, activation='sigmoid', name='dense_output')(x)
 
-model = Model(inputs=inputs, outputs=output, name='model_2')
+model = Model(inputs=inputs, outputs=output, name='model_2_128_128_64')
 
 # Binary crossentropy as a loss function is ideal for a binary problem
-model.compile(optimizer='rmsprop',
+model.compile(optimizer='adam',
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
@@ -63,7 +73,7 @@ val_steps = NUM_OF_IMAGES_VAL // BATCH_SIZE
 # Early stopping can be useful in order to prevent excessive training
 # and stopping at the best model if accuracy doesn't get better
 early_stopping = EarlyStopping(
-    patience=3,
+    patience=5,
     monitor='val_accuracy',
     mode='max',
     restore_best_weights=True,
@@ -78,7 +88,7 @@ history = model.fit(train_generator,
                     steps_per_epoch=steps_per_epoch,
                     validation_steps=val_steps,
                     validation_data=validation_generator,
-                    epochs=EPOCHS,
+                    epochs=EPOCHS + 5,
                     use_multiprocessing=True,
                     workers=8,
                     callbacks=[early_stopping, wandb_callback])
@@ -88,6 +98,6 @@ print(f'Acc  = {acc}')
 
 # %%
 
-model.save(f'model_2_dropout_0.h5')
+model.save(f'model_2_128_128_64.h5')
 
 # %%
