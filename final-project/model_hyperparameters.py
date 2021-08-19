@@ -8,7 +8,7 @@
 
 import tensorflow as tf
 import wandb
-from tensorflow.keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, Dropout, Input
+from tensorflow.keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, Input
 from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import EarlyStopping
 from wandb.keras import WandbCallback
@@ -19,15 +19,11 @@ from image_generation import train_generator, test_generator, validation_generat
 # %% Function utilities for creating and validating models
 
 
-def create_model(name='', input_dropout=0, num_of_kernels=32, dense_dropout=0, kernel_size=(5, 5), dense_units=64):
+def create_model(name='', num_of_kernels=32, kernel_size=(5, 5)):
     '''A function with some useful parameters in order to create easily different models'''
     
     inputs = Input(shape=(IMG_SIZE, IMG_SIZE, 1), name='input_layer')
     x = inputs
-
-    # Dropout after the input could be beneficial in order to generalize better
-    # and reduce overfitting
-    x = Dropout(input_dropout, name='input_dropout')(x)
 
     # We work on images, so a CNN (Convolutional Neural Network) is useful
     # Here we try a couple of convolutional layers with max pooling
@@ -39,11 +35,9 @@ def create_model(name='', input_dropout=0, num_of_kernels=32, dense_dropout=0, k
     x = Flatten(name='flatten')(x)
 
     # After the convolutional, a couple of dense layers to learn
-    x = Dense(dense_units, activation='relu', name='dense_1')(x)
-    x = Dropout(dense_dropout, name='dense_dropout1')(x)
-    x = Dense(dense_units, activation='relu', name='dense_2')(x)
-    x = Dropout(dense_dropout, name='dense_dropout2')(x)
-    x = Dense(dense_units, activation='relu', name='dense_3')(x)
+    x = Dense(64, activation='relu', name='dense_1')(x)
+    x = Dense(64, activation='relu', name='dense_2')(x)
+    x = Dense(64, activation='relu', name='dense_3')(x)
 
     # Since we are dealing with a binary problem (pneumonia or normal),
     # the output is given by this 1 neuron with a sigmoid activation function
@@ -127,46 +121,20 @@ def test_model(ks=[], create=lambda x: x):
 # - the kernel size
 # - the number of filters
 
-kernel, model_kernel, history_kernel = test_model(
-    ks=[(3, 3), (5, 5), (7, 7)],
-    create=lambda x: create_model(name=f'model_kernel_{x[0]}x{x[1]}', kernel_size=x))
+if __name__ == '__main__':
+    kernel, model_kernel, history_kernel = test_model(
+        ks=[(3, 3), (5, 5), (7, 7)],
+        create=lambda x: create_model(name=f'model_kernel_{x[0]}x{x[1]}', kernel_size=x))
+
+# The best we have found is 7x7
 
 # %% Finding the best number of kernels
 
-base_name = f'model_k{kernel[0]}x{kernel[1]}'
-num_of_kernels, model_num_kernels, history_num_kernels = test_model(
-    ks=[8, 16, 32],
-    create=lambda x: create_model(name=f'{base_name}_num_kernels_{x}', kernel_size=kernel)
-)
+if __name__ == '__main__':
+    base_name = f'model_k7x7'
+    num_of_kernels, model_num_kernels, history_num_kernels = test_model(
+        ks=[8, 16, 32],
+        create=lambda x: create_model(name=f'{base_name}_num_kernels_{x}', kernel_size=(7, 7))
+    )
 
-# %% Putting together and training the model
-
-# This is the final model comprising of all of the hyperparameters seen before
-
-model = create_model(name='model_no_reg',
-                     num_of_kernels=num_of_kernels,
-                     kernel_size=kernel,
-                     dense_units=units)
-
-history = fit_model(model)
-loss, acc = evaluate_model(model, validation_generator)
-print(f'Loss = {loss}')
-print(f'Acc  = {acc}')
-
-# # %% Adding dropout
-
-# # Here we add dropout and regularization in order to prevent overfitting
-
-# input_drop, _, _ = test_model(
-#     ks=[0.1, 0.2, 0.4, 0.5, 0.6],
-#     create=lambda x: create_model(
-#         name=f'model_in_drop_{x}',
-#         input_dropout=x,
-#         num_of_kernels=num_of_kernels,
-#         kernel_size=kernel,
-#         dense_units=units)
-# )
-
-# # %% Save the model
-
-# model.save('model.h5')
+    # The best we have found is 32
