@@ -5,20 +5,7 @@
 
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-from constants import IMG_SIZE, BATCH_SIZE, NUM_OF_IMAGES_TRAIN, NUM_OF_IMAGES_VAL
-
-# model = Sequential()
-# model.add(Conv2D(32, (3, 3), input_shape=(IMG_SIZE, IMG_SIZE, 1),
-#           activation='relu'))  # this helps the tensor of output
-# # i used pooling since we need max value pixel for the ROI
-# model.add(MaxPooling2D(pool_size=(2, 2)))
-# model.add(Flatten())  # then flatten
-# model.add(Dense(128, activation='relu'))
-# model.add(Dense(1, activation='sigmoid'))
-
-# model.compile(optimizer='adam',
-#               loss='binary_crossentropy',
-#               metrics=['accuracy'])
+from constants import IMG_SIZE, BATCH_SIZE
 
 # we start with the image data generator
 training_datagenerator = ImageDataGenerator(rescale=1/255,
