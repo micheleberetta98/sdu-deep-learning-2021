@@ -1,3 +1,9 @@
+'''
+    This file is used to test all the different models and then take the best one
+    @author Michele Beretta
+    @author Bianca Crippa
+'''
+
 # %% Imports
 
 import tensorflow as tf

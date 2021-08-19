@@ -1,3 +1,8 @@
+'''
+    This file defines all the images generators to use in the model creation
+    @author Mark John Paul Pangan
+'''
+
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 from constants import IMG_SIZE, BATCH_SIZE, NUM_OF_IMAGES_TRAIN, NUM_OF_IMAGES_VAL
