@@ -114,4 +114,99 @@ print(f'Acc  = {acc}')
 
 model.save(f'{model.name}.h5')
 
-# %%
+# %% Visualize Activations
+from tensorflow.keras.models import Model
+import matplotlib.pyplot as plt
+
+layer_outputs= [layer.output for layer in model.layers]
+activation_model= Model(inputs=model.input, outputs=layer_outputs)
+
+def display_activation(activations, col_size, row_size, act_index):
+    activation = activations[act_index]
+    activation_index=0
+    fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*2.5,col_size*1.5))
+    for row in range(0,row_size):
+        for col in range(0,col_size):
+            ax[row][col].imshow(activation[activation_index, :, :, 0], cmap='gray')
+            activation_index+= 1
+
+
+activations = activation_model.predict(test_generator[3])
+display_activation(activations, 9, 5, 0)   
+    
+    
+#%% Confusion Matrix
+from sklearn.metrics import confusion_matrix
+import itertools
+import numpy as np
+
+# print(train_generator.class_indices)
+
+probabilities = model.predict_generator(generator=test_generator)
+y_true = test_generator.classes
+y_pred = probabilities > 0.5
+
+cm = confusion_matrix(y_true, y_pred)
+
+# Function provided by https://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html#sphx-glr-auto-examples-model-selection-plot-confusion-matrix-py
+def plot_confusion_matrix(cm, classes,
+                        normalize=False,
+                        title='Confusion matrix',
+                        cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, cm[i, j],
+            horizontalalignment="center",
+            color="red")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.savefig('confusion')
+
+
+cm_plot_labels = ['pneunomia','normal']
+
+plot_confusion_matrix(cm=cm, classes=cm_plot_labels, title='Confusion Matrix')
+
+
+#%% Kernel Heatmap
+
+import seaborn
+
+layer_names = []
+for layer in model.layers:
+    #  if layer.name.startswith("conv"):
+    layer_names.append(layer.name)
+
+
+for layer in layer_names:
+    try:
+        kernels = model.get_layer(name=layer).get_weights()[0][:, :, 0, :] 
+        
+        fig = plt.figure(figsize=(12,12))
+        plt.suptitle("{}: Kernels Heatmap".format(layer))
+        
+        for i in range(n_filters):
+            ax = fig.add_subplot(6,6, i+1)
+            imgplot = seaborn.heatmap(kernels[:,:,i])
+            ax.set_title('Kernel No. {}'.format(i))
+            ax.set_aspect('equal', adjustable='datalim')
+                   
+        fig.tight_layout()
+        plt.savefig('kernel_heatmap_{}'.format(layer))
+        plt.show()
+    except IndexError:
+        print("Not possible for layer: ",layer)
+    except:
+        print("Error for layer: ",layer)
