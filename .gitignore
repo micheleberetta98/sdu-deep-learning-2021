@@ -2,4 +2,6 @@ final-project/images
 final-project/training
 final-project/testing
 final-project/validation
+__pycache__
+wandb/
 .vscode
