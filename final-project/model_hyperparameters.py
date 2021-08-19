@@ -126,7 +126,7 @@ if __name__ == '__main__':
         ks=[(3, 3), (5, 5), (7, 7)],
         create=lambda x: create_model(name=f'model_kernel_{x[0]}x{x[1]}', kernel_size=x))
 
-# The best we have found is 7x7
+# The best we have found is 5x5
 
 # %% Finding the best number of kernels
 
@@ -137,4 +137,4 @@ if __name__ == '__main__':
         create=lambda x: create_model(name=f'{base_name}_num_kernels_{x}', kernel_size=(7, 7))
     )
 
-    # The best we have found is 32
+# The best we have found is 32

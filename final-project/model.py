@@ -24,7 +24,7 @@ from model_hyperparameters import evaluate_model
 # %% Model definition
 
 # The hyperparameters
-kernel_size = (7, 7)
+kernel_size = (5, 5)
 n_filters = 32
 dense_dropout = 0.1
 units = [128, 128, 64]
@@ -65,7 +65,7 @@ x = Dense(units[2], activation='relu', kernel_regularizer=l2(l2_k), name='dense_
 # the output is given by this 1 neuron with a sigmoid activation function
 output = Dense(1, activation='sigmoid', name='dense_output')(x)
 
-model = Model(inputs=inputs, outputs=output, name='model_dropout_reg-l2-0.01_middle01')
+model = Model(inputs=inputs, outputs=output, name='model_2_dropout_reg-l2-0.01_middle01')
 
 # Binary crossentropy as a loss function is ideal for a binary problem
 model.compile(optimizer='adam',
@@ -111,4 +111,6 @@ print(f'Acc  = {acc}')
 
 # %% Saving the model for future use
 
-model.save(f'model_dropout_reg-l2-0.01_middle01.h5')
+model.save(f'{model.name}.h5')
+
+# %%
