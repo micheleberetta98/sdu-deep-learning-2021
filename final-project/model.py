@@ -12,9 +12,9 @@ import tensorflow as tf
 import wandb
 from wandb.keras import WandbCallback
 from tensorflow.keras.layers import Dense, Conv2D, Concatenate, AvgPool2D, MaxPooling2D, Flatten, Dropout, Input
-from tensorflow.keras.models import Model
+from tensorflow.keras.models import Model, load_model
 from tensorflow.keras.callbacks import EarlyStopping
-from tensorflow.keras.regularizers import l1_l2
+from tensorflow.keras.regularizers import l2
 import matplotlib.pyplot as plt
 
 from constants import IMG_SIZE, NUM_OF_IMAGES_VAL, NUM_OF_IMAGES_TRAIN, EPOCHS, BATCH_SIZE
@@ -52,15 +52,15 @@ x = Dropout(dense_dropout, name='dense_dropout')(x)
 x = Flatten(name='flatten_1')(x)
 
 # After the convolutional, a couple of dense layers to learn
-x = Dense(units[0], activation='relu', kernel_regularizer=l1_l2(), name='dense_1')(x)
-x = Dense(units[1], activation='relu', kernel_regularizer=l1_l2(), name='dense_2')(x)
-x = Dense(units[2], activation='relu', kernel_regularizer=l1_l2(), name='dense_3')(x)
+x = Dense(units[0], activation='relu', kernel_regularizer=l2(0.01), name='dense_1')(x)
+x = Dense(units[1], activation='relu', kernel_regularizer=l2(0.01), name='dense_2')(x)
+x = Dense(units[2], activation='relu', kernel_regularizer=l2(0.01), name='dense_3')(x)
 
 # Since we are dealing with a binary problem (pneumonia or normal),
 # the output is given by this 1 neuron with a sigmoid activation function
 output = Dense(1, activation='sigmoid', name='dense_output')(x)
 
-model = Model(inputs=inputs, outputs=output, name='model_dropout__reg-l1-l2-0.01_middle01')
+model = Model(inputs=inputs, outputs=output, name='model_dropout__reg-l2-0.01_middle01')
 
 # Binary crossentropy as a loss function is ideal for a binary problem
 model.compile(optimizer='adam',
@@ -103,32 +103,4 @@ print(f'Acc  = {acc}')
 
 # %%
 
-model.save(f'model_dropout__reg-l1-l2-0.01_middle01-95.h5')
-
-# %% Showing the loss function
-plt.figure()
-loss_values = history.history['loss']
-val_loss_values = history.history['val_loss']
-epochs = range(1, len(loss_values) + 1)
-
-plt.plot(epochs, loss_values, label='Training')
-plt.plot(epochs, val_loss_values, label='Validation')
-plt.set(xlabel='Epochs', ylabel='Loss')
-plt.legend()
-plt.title('Loss')
-plt.show()
-plt.savefig('model_dropout__reg-l1-l2-0.01_middle01-loss.jpg')
-
-# %% Showing the accuracy function
-plt.figure()
-acc_values = history.history['accuracy']
-val_acc_values = history.history['val_accuracy']
-epochs = range(1, len(acc_values) + 1)
-
-plt.plot(epochs, acc_values, label='Training')
-plt.plot(epochs, val_acc_values, label='Validation')
-plt.set(xlabel='Epochs', ylabel='Accuray')
-plt.legend()
-plt.title('Accuracy')
-plt.show()
-plt.savefig('model_dropout__reg-l1-l2-0.01_middle01-loss.jpg')
+model.save(f'model_dropout__reg-l2-0.01_middle01.h5')
