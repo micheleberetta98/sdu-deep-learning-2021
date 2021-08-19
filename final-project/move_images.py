@@ -5,10 +5,10 @@ import shutil
 import os
 from pathlib import Path
 
-# %% Directory creation
-
+# %% using random seed to randomize sample files
 random.seed(0)
 
+# %% Creating source and destination directories
 source = Path('./images')
 test_dest = Path('./testing')
 val_dest = Path('./validation')
@@ -20,8 +20,6 @@ for d in [test_dest, val_dest, train_dest]:
     os.mkdir(d / 'pneumonia')
 
 # %% File copying
-
-
 def copy_random(no_of_files, status, dest):
     all_files = [x for x in os.listdir(source) if status in x]
     random_filenames = random.sample(all_files, no_of_files)
