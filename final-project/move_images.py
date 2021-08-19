@@ -1,3 +1,8 @@
+"""
+    This file is a script to move the images into the correct folders
+    @author Narendro Ariwisnu
+"""
+
 # %% Imports
 
 import random

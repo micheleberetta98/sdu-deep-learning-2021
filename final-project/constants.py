@@ -1,3 +1,7 @@
+"""
+    This file contains all the constants
+"""
+
 IMG_SIZE = 256
 BATCH_SIZE = 45
 EPOCHS = 10
