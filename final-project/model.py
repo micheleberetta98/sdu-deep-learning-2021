@@ -65,7 +65,7 @@ x = Dense(units[2], activation='relu', kernel_regularizer=l2(l2_k), name='dense_
 # the output is given by this 1 neuron with a sigmoid activation function
 output = Dense(1, activation='sigmoid', name='dense_output')(x)
 
-model = Model(inputs=inputs, outputs=output, name='model_dropout__reg-l2-0.01_middle01')
+model = Model(inputs=inputs, outputs=output, name='model_dropout_reg-l2-0.01_middle01')
 
 # Binary crossentropy as a loss function is ideal for a binary problem
 model.compile(optimizer='adam',
@@ -111,4 +111,4 @@ print(f'Acc  = {acc}')
 
 # %% Saving the model for future use
 
-model.save(f'model_dropout__reg-l2-0.01_middle01.h5')
+model.save(f'model_dropout_reg-l2-0.01_middle01.h5')
