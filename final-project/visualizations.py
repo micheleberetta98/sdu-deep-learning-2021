@@ -32,7 +32,7 @@ models = [model_2_128_128_64, model_dropout__reg_l2_001_middle01_95, model_dropo
 
 # %% Layers activations
 '''
-These functions visualize the activations
+These functions visualize some examples of activations for the first layer of a given model.
 '''
 
 def visualize_activations(model, path):
@@ -44,7 +44,7 @@ def visualize_activations(model, path):
         activation_index = 0
         fig, ax = plt.subplots(
             row_size, col_size, figsize=(row_size*2.5, col_size*1.5))
-        plt.suptitle("Activations")
+        plt.suptitle("Example Activations for the first layer")
         for row in range(0, row_size):
             for col in range(0, col_size):
                 ax[row][col].imshow(
@@ -61,7 +61,8 @@ def visualize_activations(model, path):
 
 #%% Kernel Heatmap
 '''
-This function plots a heatmap of the weight matrix of each kernel
+This function plots a heatmap of the weight matrix of each kernel of a given layer.
+
 '''
 
 def kernel_heatmap(model, layer_name, path):
@@ -83,7 +84,10 @@ def kernel_heatmap(model, layer_name, path):
 
 # %% Confusion matrix
 '''
-This function plots a confusion matrics to summarize the performance of our models
+This function plots confusion matrices to summarize the performance of our models.
+The y-axis shows the true labels whereas the x-axis shows what our models predicted.
+So we can see the percentage of false positives, false negatives, true positives, and true negative.
+This allows us to analyse the accuracy of the model further.
 '''
 
 def get_confusion_matrix(model):
