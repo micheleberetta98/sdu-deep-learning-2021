@@ -23,6 +23,10 @@ We just wanted to include them to show the work done.
 The history visualizations were done with *Weight and Biases*, and the images provided are the export of those.
 You can see all the plots [here](https://wandb.ai/micheleberetta98/sdu-deep-learning-final?workspace=user-micheleberetta98).
 
+## GitHub repo
+
+The code in its entirety is available [at this GitHub repo](https://github.com/micheleberetta98/sdu-deep-learning-2021/tree/master/final-project).
+
 ## Images specifications
 
 Our image's size is 256x256, and the images have been converted to grayscale.
