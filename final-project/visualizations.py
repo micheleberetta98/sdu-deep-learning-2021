@@ -5,7 +5,7 @@ Visualizing
 @author: Tanja Gurtner
 """
 
-# %%
+# %% Imports
 
 import matplotlib.pyplot as plt
 import itertools
@@ -18,7 +18,7 @@ from tensorflow.keras.models import Model
 
 from image_generation import test_generator
 
-
+# %% Loading the models
 model_2_dropout_reg_l2_001_middle01_97 = load_model(
     './final-model/model_2_dropout_reg-l2-0.01_middle01-97.h5')
 
@@ -31,6 +31,9 @@ models = [model_2_128_128_64, model_dropout__reg_l2_001_middle01_95, model_dropo
 
 
 # %% Layers activations
+'''
+These functions visualize the activations
+'''
 
 def visualize_activations(model, path):
     layer_outputs = [layer.output for layer in model.layers]
@@ -46,13 +49,20 @@ def visualize_activations(model, path):
             for col in range(0, col_size):
                 ax[row][col].imshow(
                     activation[activation_index, :, :, 0], cmap='gray')
+                ax[row][col].axis('off')
+                ax[row][col].set_aspect('equal', adjustable='datalim')
                 activation_index += 1
 
+        fig.tight_layout()    
         plt.savefig(f'{path}/activations.jpg')
 
     activations = activation_model.predict(test_generator[3][0])
     display_activation(activations, 9, 5, 0)
 
+#%% Kernel Heatmap
+'''
+This function plots a heatmap of the weight matrix of each kernel
+'''
 
 def kernel_heatmap(model, layer_name, path):
     kernels = model.get_layer(layer_name).get_weights()[0][:, :, 0, :]
@@ -72,7 +82,9 @@ def kernel_heatmap(model, layer_name, path):
     plt.show()
 
 # %% Confusion matrix
-
+'''
+This function plots a confusion matrics to summarize the performance of our models
+'''
 
 def get_confusion_matrix(model):
     '''
@@ -112,6 +124,9 @@ def plot_confusion_matrix(cm, path):
 
 
 # %% Visualizations
+'''
+In this part we run the functions on all our models
+'''
 
 for model in models:
     path = f'./other-models/{model.name}'
