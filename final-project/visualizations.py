@@ -21,13 +21,14 @@ from numpy import expand_dims
 import seaborn
 
 
-model_2_128_128_64 = load_model('model_2_128_128_64.h5')
-model_2_dropout_reg_l2_001_middle01_97 = load_model('model_2_dropout_reg-l2-0.01_middle01-97.h5')
-model_dropout__reg_l2_001_middle01_95 = load_model('model_dropout__reg-l2-0.01_middle01-95.h5')
-model_dropout_input02_92 = load_model('model_dropout_input02-92.h5')
-model_dropout_middle01_96 = load_model('model_2_128_128_64.h5')
+model_2_dropout_reg_l2_001_middle01_97 = load_model('./final-model/model_2_dropout_reg-l2-0.01_middle01-97.h5')
 
-models = [model_2_128_128_64, model_2_dropout_reg_l2_001_middle01_97, model_dropout__reg_l2_001_middle01_95, model_dropout_input02_92, model_dropout_middle01_96]
+model_2_128_128_64 = load_model('./other-models/model_2_128_128_64/model.h5')
+model_dropout__reg_l2_001_middle01_95 = load_model('./other-models/model_dropout__reg-l2-0.01_middle01/model.h5')
+model_dropout_input02_92 = load_model('./other-models/model_dropout_input02/model.h5')
+model_dropout_middle01_96 = load_model('./other-models/model_2_128_128_64/model.h5')
+
+models = [model_2_128_128_64, model_dropout__reg_l2_001_middle01_95, model_dropout_input02_92]
 
 
 # %%
@@ -94,7 +95,7 @@ def visualize_activations(model):
     
 #%% Kernel Heatmap
 
-def kernel_heatmap(model, layer_name):
+def kernel_heatmap(model, layer_name, path):
     kernels = model.get_layer(layer_name).get_weights()[0][:, :, 0, :] 
     
     fig = plt.figure(figsize=(12,12))
@@ -108,10 +109,24 @@ def kernel_heatmap(model, layer_name):
         ax.set_aspect('equal', adjustable='datalim')
 
     fig.tight_layout()
-    plt.savefig(f'models/{model.name}/kernel_heatmap_{layer_name}')
+    plt.savefig(f'{path}/kernel_heatmap_{layer_name}.jpg')
     plt.show()
     
 # %%
 for model in models:
     # visualize_activations(model)
-    kernel_heatmap(model, 'conv_2d_1')
+    kernel_heatmap(model, 'conv_2d_1', f'./other-models/{model.name}')
+
+kernel_heatmap(
+    model_dropout_middle01_96,
+    'conv_2d_1',
+    './other-models/model_dropout_middle01'
+)
+
+kernel_heatmap(
+    model_2_dropout_reg_l2_001_middle01_97,
+    'conv_2d_1',
+    './final-model'
+)
+    
+# %%
