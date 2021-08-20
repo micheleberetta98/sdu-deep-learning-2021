@@ -5,16 +5,27 @@ Created on Thu Aug 19 21:35:19 2021
 
 @author: Admin
 """
+ 
+ # %%
 
-from tensorflow import keras
 from image_generation import validation_generator, train_generator, test_generator
+from tensorflow.keras.models import Model, load_model
+import matplotlib.pyplot as plt
+from tensorflow.keras.applications.vgg16 import VGG16
+from tensorflow.keras.applications.vgg16 import preprocess_input
+from tensorflow.keras.preprocessing.image import load_img
+from tensorflow.keras.preprocessing.image import img_to_array
+from tensorflow.keras.models import Model
+from numpy import expand_dims
+
+import seaborn
 
 
-model_2_128_128_64 = keras.models.load_model('model_2_128_128_64.h5')
-model_2_dropout_reg_l2_001_middle01_97 = keras.models.load_model('model_2_dropout_reg-l2-0.01_middle01-97.h5')
-model_dropout__reg_l2_001_middle01_95 = keras.models.load_model('model_dropout__reg-l2-0.01_middle01-95.h5')
-model_dropout_input02_92 = keras.models.load_model('model_dropout_input02-92.h5')
-model_dropout_middle01_96 = keras.models.load_model('model_2_128_128_64.h5')
+model_2_128_128_64 = load_model('model_2_128_128_64.h5')
+model_2_dropout_reg_l2_001_middle01_97 = load_model('model_2_dropout_reg-l2-0.01_middle01-97.h5')
+model_dropout__reg_l2_001_middle01_95 = load_model('model_dropout__reg-l2-0.01_middle01-95.h5')
+model_dropout_input02_92 = load_model('model_dropout_input02-92.h5')
+model_dropout_middle01_96 = load_model('model_2_128_128_64.h5')
 
 models = [model_2_128_128_64, model_2_dropout_reg_l2_001_middle01_97, model_dropout__reg_l2_001_middle01_95, model_dropout_input02_92, model_dropout_middle01_96]
 
@@ -22,13 +33,6 @@ models = [model_2_128_128_64, model_2_dropout_reg_l2_001_middle01_97, model_drop
 # %%
 
 # visualize feature maps output from each block in the vgg model
-from keras.applications.vgg16 import VGG16
-from keras.applications.vgg16 import preprocess_input
-from keras.preprocessing.image import load_img
-from keras.preprocessing.image import img_to_array
-from keras.models import Model
-from matplotlib import pyplot as plt
-from numpy import expand_dims
 
 # redefine model to output right after the first hidden layer
 ixs = [2, 5, 9, 13, 17]
@@ -69,10 +73,7 @@ for fmap in feature_maps:
 
 # %% Visualize Activations
 
-def visualize_activations(model):
-    from tensorflow.keras.models import Model
-    import matplotlib.pyplot as plt
-    
+def visualize_activations(model):    
     layer_outputs= [layer.output for layer in model.layers]
     activation_model= Model(inputs=model.input, outputs=layer_outputs)
     
@@ -93,39 +94,24 @@ def visualize_activations(model):
     
 #%% Kernel Heatmap
 
-import seaborn
+def kernel_heatmap(model, layer_name):
+    kernels = model.get_layer(layer_name).get_weights()[0][:, :, 0, :] 
+    
+    fig = plt.figure(figsize=(12,12))
+    plt.suptitle("{}: Kernels Heatmap".format(layer_name))
+    
+    n_filters = kernels.shape[2]
+    for i in range(n_filters):
+        ax = fig.add_subplot(6,6, i+1)
+        imgplot = seaborn.heatmap(kernels[:,:,i])
+        ax.set_title('Kernel No. {}'.format(i))
+        ax.set_aspect('equal', adjustable='datalim')
 
-def kernel_heatmap(model):
-    layer_names = []
-    for layer in model.layers:
-        #  if layer.name.startswith("conv"):
-        layer_names.append(layer.name)
-    
-    
-    for layer in layer_names:
-        try:
-            kernels = model.get_layer(name=layer).get_weights()[0][:, :, 0, :] 
-            
-            fig = plt.figure(figsize=(12,12))
-            plt.suptitle("{}: Kernels Heatmap".format(layer))
-            
-            for i in range(n_filters):
-                ax = fig.add_subplot(6,6, i+1)
-                imgplot = seaborn.heatmap(kernels[:,:,i])
-                ax.set_title('Kernel No. {}'.format(i))
-                ax.set_aspect('equal', adjustable='datalim')
-                       
-            fig.tight_layout()
-            plt.savefig('kernel_heatmap_{}'.format(layer))
-            plt.show()
-        except IndexError:
-            print("Not possible for layer: ",layer)
-            continue
-        except:
-            print("Error for layer: ",layer)
-            continue
+    fig.tight_layout()
+    plt.savefig(f'models/{model.name}/kernel_heatmap_{layer_name}')
+    plt.show()
     
 # %%
 for model in models:
     # visualize_activations(model)
-    kernel_heatmap(model)
+    kernel_heatmap(model, 'conv_2d_1')
