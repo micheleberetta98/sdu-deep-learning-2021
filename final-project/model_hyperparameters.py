@@ -128,11 +128,11 @@ if __name__ == '__main__':
 
 # The best we have found are 5x5 and 7x7 (they seems to behave similarly)
 
-# %% Finding the best number of kernels
+# %% Finding the best number of filters
 
 if __name__ == '__main__':
     base_name = f'model_k7x7'
-    num_of_kernels, model_num_kernels, history_num_kernels = test_model(
+    num_of_filters, model_num_filters, history_num_filters = test_model(
         ks=[8, 16, 32],
         create=lambda x: create_model(name=f'{base_name}_num_kernels_{x}', kernel_size=(7, 7))
     )
