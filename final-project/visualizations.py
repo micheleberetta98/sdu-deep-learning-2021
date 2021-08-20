@@ -8,15 +8,13 @@ Created on Thu Aug 19 21:35:19 2021
  
  # %%
 
-from image_generation import validation_generator, train_generator, test_generator
+from image_generation import test_generator
 from tensorflow.keras.models import Model, load_model
 import matplotlib.pyplot as plt
-from tensorflow.keras.applications.vgg16 import VGG16
-from tensorflow.keras.applications.vgg16 import preprocess_input
-from tensorflow.keras.preprocessing.image import load_img
-from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.models import Model
-from numpy import expand_dims
+from sklearn.metrics import confusion_matrix
+import itertools
+import numpy as np
 
 import seaborn
 
@@ -31,7 +29,7 @@ model_dropout_middle01_96 = load_model('./other-models/model_2_128_128_64/model.
 models = [model_2_128_128_64, model_dropout__reg_l2_001_middle01_95, model_dropout_input02_92]
 
 
-# %% Visualize Activations
+# %% Layers activations
 
 def visualize_activations(model, path):    
     layer_outputs = [layer.output for layer in model.layers]
@@ -70,31 +68,75 @@ def kernel_heatmap(model, layer_name, path):
     fig.tight_layout()
     plt.savefig(f'{path}/kernel_heatmap_{layer_name}.jpg')
     plt.show()
-    
+
+# %% Confusion matrix
+
+def get_confusion_matrix(model):
+    '''
+    This functions calculates the confusion matrix cm for the model model
+    '''
+    probabilities = model.predict_generator(generator=test_generator)
+    y_true = test_generator.classes
+    y_pred = probabilities > 0.5
+
+    cm = confusion_matrix(y_true, y_pred)
+    return cm
+
+# Function provided by https://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html#sphx-glr-auto-examples-model-selection-plot-confusion-matrix-py
+def plot_confusion_matrix(cm, path):
+    """
+    This function prints and plots the confusion matrix.
+    """
+    classes = ['pneumonia', 'normal']
+    plt.figure()
+    plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+    plt.title('Confusion Matrix')
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, cm[i, j],
+            horizontalalignment="center",
+            color="red")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.savefig(f'{path}/confusion_matrix.jpg')
+    plt.show()
+
+
 # %% Visualizations
 
 for model in models:
-    visualize_activations(model, f'./other-models/{model.name}')
-    kernel_heatmap(model, 'conv_2d_1', f'./other-models/{model.name}')
+    path = f'./other-models/{model.name}'
+    visualize_activations(model, path)
+    kernel_heatmap(model, 'conv_2d_1', path)
+    cm = get_confusion_matrix(model)
+    plot_confusion_matrix(cm, path)
 
 visualize_activations(
     model_dropout_middle01_96,
-    './other-models/model_dropout_middle01'
-)
+    './other-models/model_dropout_middle01')
 kernel_heatmap(
     model_dropout_middle01_96,
     'conv_2d_1',
-    './other-models/model_dropout_middle01'
-)
+    './other-models/model_dropout_middle01')
+plot_confusion_matrix(
+    get_confusion_matrix(model_dropout_middle01_96),
+    './other-models/model_dropout_middle01')
 
 visualize_activations(
     model_2_dropout_reg_l2_001_middle01_97,
-    './final-model'
-)
+    './final-model')
 kernel_heatmap(
     model_2_dropout_reg_l2_001_middle01_97,
     'conv_2d_1',
-    './final-model'
-)
+    './final-model')
+plot_confusion_matrix(
+    get_confusion_matrix(model_2_dropout_reg_l2_001_middle01_97),
+    './final-model')
     
 # %%
