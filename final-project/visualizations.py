@@ -31,66 +31,25 @@ model_dropout_middle01_96 = load_model('./other-models/model_2_128_128_64/model.
 models = [model_2_128_128_64, model_dropout__reg_l2_001_middle01_95, model_dropout_input02_92]
 
 
-# %%
-
-# visualize feature maps output from each block in the vgg model
-
-# redefine model to output right after the first hidden layer
-ixs = [2, 5, 9, 13, 17]
-outputs = [model.layers[i].output for i in ixs]
-model = Model(inputs=model.inputs, outputs=outputs)
-# load the image with the required shape
-img = load_img('bird.jpg', target_size=(224, 224))
-# convert the image to an array
-img = img_to_array(img)
-# expand dimensions so that it represents a single 'sample'
-img = expand_dims(img, axis=0)
-# prepare the image (e.g. scale pixel values for the vgg)
-img = preprocess_input(img)
-# get feature map for first hidden layer
-feature_maps = model.predict(img)
-# plot the output from each block
-square = 8
-for fmap in feature_maps:
-	# plot all 64 maps in an 8x8 squares
-	ix = 1
-	for _ in range(square):
-		for _ in range(square):
-			# specify subplot and turn of axis
-			ax = pyplot.subplot(square, square, ix)
-			ax.set_xticks([])
-			ax.set_yticks([])
-			# plot filter channel in grayscale
-			pyplot.imshow(fmap[0, :, :, ix-1], cmap='gray')
-			ix += 1
-	# show the figure
-	pyplot.show()
-
-
-
-
-
-
-
 # %% Visualize Activations
 
-def visualize_activations(model):    
-    layer_outputs= [layer.output for layer in model.layers]
-    activation_model= Model(inputs=model.input, outputs=layer_outputs)
+def visualize_activations(model, path):    
+    layer_outputs = [layer.output for layer in model.layers]
+    activation_model = Model(inputs=model.input, outputs=layer_outputs)
     
     def display_activation(activations, col_size, row_size, act_index):
         activation = activations[act_index]
         activation_index=0
         fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*2.5,col_size*1.5))
-        plt.suptitle("{}: Activations".format(model.name))
+        plt.suptitle("Activations")
         for row in range(0,row_size):
             for col in range(0,col_size):
                 ax[row][col].imshow(activation[activation_index, :, :, 0], cmap='gray')
                 activation_index+= 1
     
-        plt.savefig('{}_activations'.format(model.name))
+        plt.savefig(f'{path}/activations.jpg')
     
-    activations = activation_model.predict(test_generator[3])
+    activations = activation_model.predict(test_generator[3][0])
     display_activation(activations, 9, 5, 0)
     
 #%% Kernel Heatmap
@@ -112,17 +71,26 @@ def kernel_heatmap(model, layer_name, path):
     plt.savefig(f'{path}/kernel_heatmap_{layer_name}.jpg')
     plt.show()
     
-# %%
+# %% Visualizations
+
 for model in models:
-    # visualize_activations(model)
+    visualize_activations(model, f'./other-models/{model.name}')
     kernel_heatmap(model, 'conv_2d_1', f'./other-models/{model.name}')
 
+visualize_activations(
+    model_dropout_middle01_96,
+    './other-models/model_dropout_middle01'
+)
 kernel_heatmap(
     model_dropout_middle01_96,
     'conv_2d_1',
     './other-models/model_dropout_middle01'
 )
 
+visualize_activations(
+    model_2_dropout_reg_l2_001_middle01_97,
+    './final-model'
+)
 kernel_heatmap(
     model_2_dropout_reg_l2_001_middle01_97,
     'conv_2d_1',
