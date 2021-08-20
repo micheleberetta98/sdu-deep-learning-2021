@@ -2,8 +2,8 @@
 This file contains the final model which has been tested and tweaked
 in order to have the highest accuracy possible
 
-@author Michele Beretta (model testing)
-@author Bianca Crippa   (model testing)
+@author Michele Beretta
+@author Bianca Crippa
 '''
 
 # %% Imports
