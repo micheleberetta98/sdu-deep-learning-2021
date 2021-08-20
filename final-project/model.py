@@ -4,21 +4,20 @@ in order to have the highest accuracy possible
 
 @author Michele Beretta (model testing)
 @author Bianca Crippa   (model testing)
-@author Tanja Gurtner   (visualizations)
 '''
 
 # %% Imports
 
 import tensorflow as tf
 import wandb
-from wandb.keras import WandbCallback
+
 from tensorflow.keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, Dropout, Input
-from tensorflow.keras.models import Model, load_model
+from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.regularizers import l2
-import matplotlib.pyplot as plt
+from wandb.keras import WandbCallback
 
-from constants import IMG_SIZE, NUM_OF_IMAGES_VAL, NUM_OF_IMAGES_TRAIN, BATCH_SIZE
+from constants import IMG_SIZE, STEPS_PER_EPOCH, VAL_STEPS
 from image_generation import validation_generator, train_generator, test_generator
 from model_hyperparameters import evaluate_model
 
@@ -33,19 +32,25 @@ l2_k = 0.01
 
 # Kernel size and the number of convolutional layers were chosen as explained in model_hyperparameters.py
 # The other ones were chosen by trial and error.
+
+# We first tried making the model more complex, so that it overfits.
+# Then, we added dropout right after the convolutional part.
 # We also noticed that a dropout right after the input wasn't so beneficial as an output in the middle of the
-# model, and that a l1 regularizer (or a l1-l2) was too much aggressive so we went for a l2 regularizer.
+# model.
+
+# After that, we tried adding regularizers.
+# We also noticed that a l1 regularizer (or a l1-l2) was too much aggressive so we went for a l2 regularizer
+
 # Moreover, we tried to have multiple branches on the convolutional aprt, but performance didn't seem
 # to be affected a lot positively, so we went for a simpler linear model.
 
 # This is the final model comprising of all of the hyperparameters seen in model_hyperparameters
-# Here we test for dropout and regularization in order to reduce overfitting
 
 inputs = Input(shape=(IMG_SIZE, IMG_SIZE, 1), name='input_layer')
 x = inputs
 
 # We work on images, so a CNN (Convolutional Neural Network) is useful
-# Here we try a couple of convolutional layers with max pooling 
+# Here we try a couple of convolutional layers with max pooling
 
 x = Conv2D(n_filters, kernel_size, activation='relu', name='conv_2d_1')(x)
 x = MaxPooling2D((3, 3), name='max_2d_1')(x)
@@ -66,7 +71,9 @@ x = Dense(units[2], activation='relu', kernel_regularizer=l2(l2_k), name='dense_
 # the output is given by this 1 neuron with a sigmoid activation function
 output = Dense(1, activation='sigmoid', name='dense_output')(x)
 
-model = Model(inputs=inputs, outputs=output, name='model_2_dropout_reg-l2-0.01_middle01')
+model = Model(inputs=inputs,
+              outputs=output,
+              name='model_2_dropout_reg-l2-0.01_middle01')
 
 # Binary crossentropy as a loss function is ideal for a binary problem
 model.compile(optimizer='adam',
@@ -74,9 +81,6 @@ model.compile(optimizer='adam',
               metrics=['accuracy'])
 
 # %% Fitting process
-
-steps_per_epoch = NUM_OF_IMAGES_TRAIN // BATCH_SIZE
-val_steps = NUM_OF_IMAGES_VAL // BATCH_SIZE
 
 # Early stopping can be useful in order to prevent excessive training
 # and stopping at the best model if accuracy doesn't get better
@@ -90,14 +94,17 @@ early_stopping = EarlyStopping(
 # We are using wandb to log the data and to provide graphs, which are visible
 # at https://wandb.ai/micheleberetta98/sdu-deep-learning-final?workspace=user-micheleberetta98
 # (we also saved the images for the best networks)
-wandb.init(project='sdu-deep-learning-final', entity='micheleberetta98', name=model.name)
+# If you want to run this file, I'd suggest taking out the wandb references (if you don't you'll be asked for a token to login)
+wandb.init(project='sdu-deep-learning-final',
+           entity='micheleberetta98',
+           name=model.name)
 wandb_callback = WandbCallback(log_weights=True,
-                                log_evaluation=True,
-                                save_model=True,
-                                validation_steps=val_steps)
+                               log_evaluation=True,
+                               save_model=True,
+                               validation_steps=VAL_STEPS)
 history = model.fit(train_generator,
-                    steps_per_epoch=steps_per_epoch,
-                    validation_steps=val_steps,
+                    steps_per_epoch=STEPS_PER_EPOCH,
+                    validation_steps=VAL_STEPS,
                     validation_data=validation_generator,
                     epochs=15,
                     use_multiprocessing=True,

@@ -13,7 +13,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import EarlyStopping
 from wandb.keras import WandbCallback
 
-from constants import IMG_SIZE, NUM_OF_IMAGES_TRAIN, NUM_OF_IMAGES_VAL, BATCH_SIZE, EPOCHS
+from constants import IMG_SIZE, STEPS_PER_EPOCH, VAL_STEPS
 from image_generation import train_generator, test_generator, validation_generator
 
 # %% Function utilities for creating and validating models
@@ -21,7 +21,7 @@ from image_generation import train_generator, test_generator, validation_generat
 
 def create_model(name='', num_of_kernels=32, kernel_size=(5, 5)):
     '''A function with some useful parameters in order to create easily different models'''
-    
+
     inputs = Input(shape=(IMG_SIZE, IMG_SIZE, 1), name='input_layer')
     x = inputs
 
@@ -58,10 +58,6 @@ def evaluate_model(model, val_generator, verbose=0):
     score = model.evaluate(val_generator, verbose=verbose)
     return score[0], score[1]
 
-# We calculate the steps per epoch so that we use all the images
-# we have in the folders
-steps_per_epoch = NUM_OF_IMAGES_TRAIN // BATCH_SIZE
-val_steps = NUM_OF_IMAGES_VAL // BATCH_SIZE
 
 # Early stopping can be useful in order to prevent excessive training
 # and stopping at the best model if loss doesn't get better
@@ -71,24 +67,27 @@ early_stopping = EarlyStopping(
     restore_best_weights=True,
 )
 
+
 def fit_model(model):
     '''Utility function to fit the model with the correct callbacks (early stopping and wandb)'''
     wandb.init(project='sdu-deep-learning-final', entity='micheleberetta98', name=model.name)
     wandb_callback = WandbCallback(log_weights=True,
                                    log_evaluation=True,
                                    save_model=True,
-                                   validation_steps=val_steps)
+                                   validation_steps=VAL_STEPS)
     history = model.fit(train_generator,
-                        steps_per_epoch=steps_per_epoch,
-                        validation_steps=val_steps,
+                        steps_per_epoch=STEPS_PER_EPOCH,
+                        validation_steps=VAL_STEPS,
                         validation_data=validation_generator,
-                        epochs=EPOCHS,
+                        epochs=10,
                         use_multiprocessing=True,
                         workers=8,
                         verbose=2,
                         callbacks=[early_stopping, wandb_callback])
+    wandb.finish()
 
     return history
+
 
 def test_model(ks=[], create=lambda x: x):
     '''Utility functions that goes through all hyperparameters ks and choose the one that minimizes test loss'''
@@ -120,6 +119,7 @@ def test_model(ks=[], create=lambda x: x):
 # Here we test different hyperparameters for the convolutional part:
 # - the kernel size
 # - the number of filters
+
 
 if __name__ == '__main__':
     kernel, model_kernel, history_kernel = test_model(

@@ -19,7 +19,12 @@ training_datagenerator = ImageDataGenerator(rescale=1/255,
 
 testing_datagenerator = ImageDataGenerator(rescale=1/255)
 
-# as stated, using the .flow_from_directory makes it work with the directory in task 1
+# We decided to convert the images to grayscale because,
+# even if they have 3 channels, in all of the images color doesn't
+# seem to be a differentiating factor (i.e. all images seems already to be grayscale),
+# so we preferred to have a slightly smaller input size.
+
+# as stated, using the .flow_from_directory makes it work with the directory structure
 train_generator = training_datagenerator.flow_from_directory(
     './training',
     color_mode='grayscale',

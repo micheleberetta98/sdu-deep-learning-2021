@@ -1,25 +1,26 @@
 # -*- coding: utf-8 -*-
 """
 Visualizing
-Created on Thu Aug 19 21:35:19 2021
 
-@author: Admin
+@author: Tanja Gurtner
 """
- 
- # %%
 
-from image_generation import test_generator
-from tensorflow.keras.models import Model, load_model
+# %%
+
 import matplotlib.pyplot as plt
-from tensorflow.keras.models import Model
-from sklearn.metrics import confusion_matrix
 import itertools
 import numpy as np
-
 import seaborn
 
+from tensorflow.keras.models import Model, load_model
+from sklearn.metrics import confusion_matrix
+from tensorflow.keras.models import Model
 
-model_2_dropout_reg_l2_001_middle01_97 = load_model('./final-model/model_2_dropout_reg-l2-0.01_middle01-97.h5')
+from image_generation import test_generator
+
+
+model_2_dropout_reg_l2_001_middle01_97 = load_model(
+    './final-model/model_2_dropout_reg-l2-0.01_middle01-97.h5')
 
 model_2_128_128_64 = load_model('./other-models/model_2_128_128_64/model.h5')
 model_dropout__reg_l2_001_middle01_95 = load_model('./other-models/model_dropout__reg-l2-0.01_middle01/model.h5')
@@ -31,37 +32,38 @@ models = [model_2_128_128_64, model_dropout__reg_l2_001_middle01_95, model_dropo
 
 # %% Layers activations
 
-def visualize_activations(model, path):    
+def visualize_activations(model, path):
     layer_outputs = [layer.output for layer in model.layers]
     activation_model = Model(inputs=model.input, outputs=layer_outputs)
-    
+
     def display_activation(activations, col_size, row_size, act_index):
         activation = activations[act_index]
-        activation_index=0
-        fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*2.5,col_size*1.5))
+        activation_index = 0
+        fig, ax = plt.subplots(
+            row_size, col_size, figsize=(row_size*2.5, col_size*1.5))
         plt.suptitle("Activations")
-        for row in range(0,row_size):
-            for col in range(0,col_size):
-                ax[row][col].imshow(activation[activation_index, :, :, 0], cmap='gray')
-                activation_index+= 1
-    
+        for row in range(0, row_size):
+            for col in range(0, col_size):
+                ax[row][col].imshow(
+                    activation[activation_index, :, :, 0], cmap='gray')
+                activation_index += 1
+
         plt.savefig(f'{path}/activations.jpg')
-    
+
     activations = activation_model.predict(test_generator[3][0])
     display_activation(activations, 9, 5, 0)
-    
-#%% Kernel Heatmap
+
 
 def kernel_heatmap(model, layer_name, path):
-    kernels = model.get_layer(layer_name).get_weights()[0][:, :, 0, :] 
-    
-    fig = plt.figure(figsize=(12,12))
+    kernels = model.get_layer(layer_name).get_weights()[0][:, :, 0, :]
+
+    fig = plt.figure(figsize=(12, 12))
     plt.suptitle("{}: Kernels Heatmap".format(layer_name))
-    
+
     n_filters = kernels.shape[2]
     for i in range(n_filters):
-        ax = fig.add_subplot(6,6, i+1)
-        imgplot = seaborn.heatmap(kernels[:,:,i])
+        ax = fig.add_subplot(6, 6, i+1)
+        imgplot = seaborn.heatmap(kernels[:, :, i])
         ax.set_title('Kernel No. {}'.format(i))
         ax.set_aspect('equal', adjustable='datalim')
 
@@ -70,6 +72,7 @@ def kernel_heatmap(model, layer_name, path):
     plt.show()
 
 # %% Confusion matrix
+
 
 def get_confusion_matrix(model):
     '''
@@ -83,6 +86,8 @@ def get_confusion_matrix(model):
     return cm
 
 # Function provided by https://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html#sphx-glr-auto-examples-model-selection-plot-confusion-matrix-py
+
+
 def plot_confusion_matrix(cm, path):
     """
     This function prints and plots the confusion matrix.
@@ -97,9 +102,7 @@ def plot_confusion_matrix(cm, path):
     plt.yticks(tick_marks, classes)
 
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, cm[i, j],
-            horizontalalignment="center",
-            color="red")
+        plt.text(j, i, cm[i, j], horizontalalignment="center", color="red")
 
     plt.tight_layout()
     plt.ylabel('True label')
@@ -138,5 +141,3 @@ kernel_heatmap(
 plot_confusion_matrix(
     get_confusion_matrix(model_2_dropout_reg_l2_001_middle01_97),
     './final-model')
-    
-# %%
