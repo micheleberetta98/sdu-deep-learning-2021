@@ -44,7 +44,7 @@ def visualize_activations(model, path):
         activation_index = 0
         fig, ax = plt.subplots(
             row_size, col_size, figsize=(row_size*2.5, col_size*1.5))
-        plt.suptitle("Activations")
+        plt.suptitle("Example activations for the first convolutional layer")
         for row in range(0, row_size):
             for col in range(0, col_size):
                 ax[row][col].imshow(
