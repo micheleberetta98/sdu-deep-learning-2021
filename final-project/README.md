@@ -23,6 +23,12 @@ We just wanted to include them to show the work done.
 The history visualizations were done with *Weight and Biases*, and the images provided are the export of those.
 You can see all the plots [here](https://wandb.ai/micheleberetta98/sdu-deep-learning-final?workspace=user-micheleberetta98).
 
+## About multiprocessing
+
+We used `use_multiprocessing=True` and `workers=8` in the fitting process.
+This could cause some problems if you want to run the project on your computer, so you should remove these two
+lines from all `model.fit` calls (or just adapt them using your processor specifications).
+
 ## GitHub repo
 
 The code in its entirety is available [at this GitHub repo](https://github.com/micheleberetta98/sdu-deep-learning-2021/tree/master/final-project).
