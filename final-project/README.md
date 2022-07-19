@@ -17,9 +17,6 @@ cooperated on almost all the tasks, especially in the network definition and tes
 
 Under the folder `final-model` there is the final model we want to submit, with its specific visualizations.
 
-Under `other-models` there are some other models that performed well with their visualizations.
-We just wanted to include them to show the work done.
-
 The history visualizations were done with *Weight and Biases*, and the images provided are the export of those.
 You can see all the plots [here](https://wandb.ai/micheleberetta98/sdu-deep-learning-final?workspace=user-micheleberetta98).
 
